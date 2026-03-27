@@ -1,26 +1,69 @@
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from "fs";
+import * as path from "path";
 
+const IGNORE = [
+  "node_modules",
+  ".git",
+  ".vscode",
+  "dist",
+  "build",
+  "out",
+  ".next"
+];
 
-export function generateTree(dir: string, prefix: string = ''): string {
+export function generateTree(
+  dir: string,
+  prefix = "",
+  depth = 4
+): { tree: string; fileCount: number; folderCount: number } {
+  if (depth === 0) {
+    return { tree: "", fileCount: 0, folderCount: 0 };
+  }
 
-    const items = fs.readdirSync(dir);
-    let tree = "";
+  let tree = "";
+  let fileCount = 0;
+  let folderCount = 0;
 
-    items.forEach((item, index) => {
-        if(["node_modules", "dist", "build"].includes(item)) return;
+  let items = fs.readdirSync(dir);
 
-        const fullPath = path.join(dir, item);
-        const isLast = index === items.length - 1;
+  // 👉 Remove ignored
+  items = items.filter(item => !IGNORE.includes(item));
 
-        const connection = isLast ? '└── ' : '├── ';
-        tree += `${prefix}${connection}${item}\n`;
+  // 👉 Sort: folders first, then files
+  items.sort((a, b) => {
+    const aPath = path.join(dir, a);
+    const bPath = path.join(dir, b);
 
-        if (fs.statSync(fullPath).isDirectory()) {
-            const newPrefix = prefix + (isLast ? '    ' : '│   ');
-            tree += generateTree(fullPath, newPrefix);
-        }   
-    });
+    const aDir = fs.statSync(aPath).isDirectory();
+    const bDir = fs.statSync(bPath).isDirectory();
 
-    return tree;
-}   
+    if (aDir === bDir) return a.localeCompare(b);
+    return aDir ? -1 : 1;
+  });
+
+  items.forEach((item, index) => {
+    const fullPath = path.join(dir, item);
+    const isLast = index === items.length - 1;
+    const connector = isLast ? "└── " : "├── ";
+
+    const isDir = fs.statSync(fullPath).isDirectory();
+
+    tree += `${prefix}${connector}${item}${isDir ? "/" : ""}\n`;
+
+    if (isDir) {
+      folderCount++;
+
+      const newPrefix = prefix + (isLast ? "    " : "│   ");
+
+      const result = generateTree(fullPath, newPrefix, depth - 1);
+
+      tree += result.tree;
+      fileCount += result.fileCount;
+      folderCount += result.folderCount;
+    } else {
+      fileCount++;
+    }
+  });
+
+  return { tree, fileCount, folderCount };
+}

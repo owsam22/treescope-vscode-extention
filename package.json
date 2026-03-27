@@ -1,24 +1,36 @@
 {
   "name": "treescope",
-  "displayName": "treescope",
-  "description": "smart file tree with explanation",
+  "displayName": "TreeScope",
+  "description": "Generate clean file tree structure for your project instantly",
   "icon": "public/icon.png",
-  "version": "0.0.2",
+  "version": "0.0.3",
+  "publisher": "owsam22",
+  "license": "MIT",
+
   "engines": {
-    "vscode": "^1.110.0"
+    "vscode": "^1.85.0"
   },
-  "categories": [
-    "Other"
-  ],
-  "activationEvents": [],
+
+  "categories": ["Other"],
+
   "main": "./out/extension.js",
+
   "repository": {
     "type": "git",
     "url": "https://github.com/owsam22/treescope-vscode-extention"
   },
-  "publisher": "owsam22",
-  "license": "MIT",
+
   "contributes": {
+    "commands": [
+      {
+        "command": "treescope.generateFromFolder",
+        "title": "TreeScope: Generate File Tree (Selected Folder)"
+      },
+      {
+        "command": "treescope.generateFromWorkspace",
+        "title": "TreeScope: Generate File Tree (Workspace Root)"
+      }
+    ],
 
     "menus": {
       "explorer/context": [
@@ -28,15 +40,9 @@
           "group": "navigation"
         }
       ]
-    },
-    "commands": [
-
-      {
-        "command": "treescope.generateFromFolder",
-        "title": "TreeScope: Generate File Tree from Folder"
-      }
-    ]
+    }
   },
+
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
@@ -45,8 +51,9 @@
     "lint": "eslint src",
     "test": "vscode-test"
   },
+
   "devDependencies": {
-    "@types/vscode": "^1.110.0",
+    "@types/vscode": "^1.85.0",
     "@types/mocha": "^10.0.10",
     "@types/node": "22.x",
     "typescript-eslint": "^8.56.1",
